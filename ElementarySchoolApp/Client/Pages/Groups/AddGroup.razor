@@ -1,0 +1,27 @@
+﻿@page "/group/add"
+@inject NavigationManager navigationManager
+@inject IGroupRepository repository
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+<h3>Add group</h3>
+
+<GroupForm Model="model" OnValidSubmit="Add">
+
+</GroupForm>
+
+@code {
+    private Group model = new Group();
+
+    private async Task Add()
+    {
+        try
+        {
+            await repository.CreateGroup(model);
+            navigationManager.NavigateTo("listofgroup");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}

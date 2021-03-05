@@ -1,0 +1,73 @@
+1) Add to Helpers folder interface IFileStorageService:
+public interface IFileStorageService
+    {
+        Task<string> SaveFile(byte[] content, string extension, string containerName);
+        Task DeleteFile(string fileRoute, string containerName);
+        Task<string> EditFile(byte[] content, string extension, string containerName, string fileRoute);
+    }
+-Step 2: add implementation class:
+public class FileStorageService : IFileStorageService
+    {
+        private readonly IWebHostEnvironment env;
+        private readonly IHttpContextAccessor httpContextAccessor;
+
+        public FileStorageService(IWebHostEnvironment env,
+            IHttpContextAccessor httpContextAccessor
+            )
+        {
+            this.env = env;
+            this.httpContextAccessor = httpContextAccessor;
+        }
+
+        public Task DeleteFile(string fileRoute, string containerName)
+        {
+            var fileName = Path.GetFileName(fileRoute);
+            string fileDirectory = Path.Combine(env.WebRootPath, containerName, fileName);
+            if (File.Exists(fileDirectory))
+            {
+                File.Delete(fileDirectory);
+            }
+
+            return Task.FromResult(0);
+        }
+
+        public async Task<string> EditFile(byte[] content, string extension, string containerName, string fileRoute)
+        {
+            if (!string.IsNullOrEmpty(fileRoute))
+            {
+                await DeleteFile(fileRoute, containerName);
+            }
+
+            return await SaveFile(content, extension, containerName);
+        }
+
+        public async Task<string> SaveFile(byte[] content, string extension, string containerName)
+        {
+            var fileName = $"{Guid.NewGuid()}.{extension}";
+            string folder = Path.Combine(env.WebRootPath, containerName);
+
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            string savingPath = Path.Combine(folder, fileName);
+            await File.WriteAllBytesAsync(savingPath, content);
+
+            var currentUrl = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}";
+            var pathForDatabase = Path.Combine(currentUrl, containerName, fileName);
+            return pathForDatabase;
+        }
+    }
+
+2)Register your services.
+	    services.AddScoped<IFileStorageService, FileStorageService>();
+            services.AddHttpContextAccessor();
+
+3)Add logic in your controller and add this code in your action method: (Don't forget to add depend!!! private readonly IFileStorageService _storageService;)
+  if (!string.IsNullOrWhiteSpace(model.Photo))
+            {
+                var modelImg = Convert.FromBase64String(model.Photo);
+                model.Photo = await _storageService.SaveFile(modelImg, "jpg", "images");
+            }
+    

@@ -1,0 +1,100 @@
+﻿<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <div>
+            <InputImage Label="Picture" OnSelectedImage="OnSelectedImage" ImageURL="@imageUrl" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            First Name
+        </label>
+        <div>
+            <InputText @bind-Value="@Model.FirstName" class="form-control"></InputText>
+            <ValidationMessage For="@(() => Model.FirstName)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Middle Name
+        </label>
+        <div>
+            <InputText @bind-Value="@Model.MiddleName" class="form-control"></InputText>
+            <ValidationMessage For="@(() => Model.MiddleName)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Last Name
+        </label>
+        <div>
+            <InputText @bind-Value="@Model.LastName" class="form-control"></InputText>
+            <ValidationMessage For="@(() => Model.LastName)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Age
+        </label>
+        <div>
+            <InputNumber @bind-Value="@Model.Age" class="form-control"></InputNumber>
+            <ValidationMessage For="@(() => Model.Age)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Profile
+        </label>
+        <div>
+            <InputTextArea @bind-Value="@Model.Profile" class="form-control" rows="5" cols="10"></InputTextArea>
+            <ValidationMessage For="@(() => Model.Profile)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Date of got a job
+        </label>
+        <div>
+            <InputDate @bind-Value="@Model.DateOfGotAJob" class="form-control"></InputDate>
+            <ValidationMessage For="@(() => Model.DateOfGotAJob)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-success" type="submit">
+            Add
+        </button>
+        <a class="btn btn-primary" href="listofpersons">
+            Back
+        </a>
+    </div>
+
+</EditForm>
+
+@code {
+    [Parameter] public Employee Model { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    public string imageUrl;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Model.Photo))
+        {
+            imageUrl = Model.Photo;
+            Model.Photo = null;
+        }
+    }
+
+    private void OnSelectedImage(string imageBase64)
+    {
+        Model.Photo = imageBase64;
+        imageUrl = null;
+    }
+}

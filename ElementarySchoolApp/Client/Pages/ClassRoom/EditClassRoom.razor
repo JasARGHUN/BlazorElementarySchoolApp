@@ -1,0 +1,57 @@
+﻿@page "/room/edit/{Id:int}"
+@inject NavigationManager navigationManager
+@inject IRoomRepository repository
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+<h3>Edit class room</h3>
+
+@if (Model != null)
+{
+    <ClassRoomForm Model="Model" OnValidSubmit="Edit"
+                   NotSelectedGroups="NotSelectedGroup"
+                   SelectedGroups="SelectedGroup"
+                   SelectedLessons="SelectedLesson"
+                   NotSelectedLessons="NotSelectedLesson"
+                   SelectedEmployees="SelectedEmployee" />
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Room Model;
+
+    private List<Group> NotSelectedGroup;
+    private List<Group> SelectedGroup;
+
+    private List<Lesson> NotSelectedLesson;
+    private List<Lesson> SelectedLesson;
+
+    private List<Employee> SelectedEmployee;
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        var obj = await repository.GetById(Id);
+
+        Model = obj.Room;
+
+        SelectedEmployee = obj.Employees;
+        SelectedGroup = obj.SelectedGroups;
+        SelectedLesson = obj.SelectedLessons;
+
+        NotSelectedGroup = obj.NotSelectedGroups;
+        NotSelectedLesson = obj.NotSelectedLessons;
+    }
+
+    private async Task Edit()
+    {
+        try
+        {
+            await repository.Update(Model);
+            navigationManager.NavigateTo($"classroom/{Id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}

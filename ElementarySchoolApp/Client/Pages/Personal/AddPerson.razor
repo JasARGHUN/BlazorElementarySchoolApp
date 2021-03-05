@@ -1,0 +1,27 @@
+﻿@page "/employee/add"
+@inject NavigationManager navigationManager
+@inject IEmployeeRepository repository
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+<h3>Add person</h3>
+
+<EmployeeForm Model="model" OnValidSubmit="Add">
+
+</EmployeeForm>
+
+@code {
+    private Employee model = new Employee();
+
+    private async Task Add()
+    {
+        try
+        {
+            await repository.Create(model);
+            navigationManager.NavigateTo("listofpersons");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}

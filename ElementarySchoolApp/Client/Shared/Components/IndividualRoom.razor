@@ -1,0 +1,48 @@
+﻿<div class="col-lg-4 col-md-9 mb-3">
+    <div class="card" style="width: 18rem;">
+        <img src="@Room.RoomImage" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">
+                Class room: @Room.ClassNameSubString / @Room.ClassNumber
+            </h5>
+            <p class="card-text">
+                StartOfTheSchool: @Room.StartOfTheSchoolYear.Value.ToString("dd MMM yyyy")
+                EndOfTheSchool: @Room.EndOfTheSchoolYear.Value.ToString("dd MMM yyyy")
+            </p>
+            <p>
+                @Room.Description
+            </p>
+        </div>
+        <div class="card-footer">
+            <a href="@roomUrl" class="btn btn-warning">
+                Details
+            </a>
+
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <a href="@roomUrlEdit" class="btn btn-warning">
+                        Edit
+                    </a>
+                    <button class="btn btn-danger" @onclick="(() => DeleteRoom.InvokeAsync(Room))">
+                        Delete
+                    </button>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Параметр компонента. Параметры позволяют передать в метод(а тут у нас компонент) некоторые входные данные.
+    [Parameter] public Room Room { get; set; }
+    [Parameter] public EventCallback<Room> DeleteRoom { get; set; } // Обратный вызов события(Событие)
+
+    private string roomUrl = string.Empty;
+    private string roomUrlEdit = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        roomUrl = $"classroom/{Room.Id}";
+        roomUrlEdit = $"room/edit/{Room.Id}";
+    }
+}

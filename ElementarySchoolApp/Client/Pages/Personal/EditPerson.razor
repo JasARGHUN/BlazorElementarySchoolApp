@@ -1,0 +1,34 @@
+﻿@page "/employee/edit/{Id:int}"
+@inject NavigationManager navigationManager
+@inject IEmployeeRepository repository
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+<h3>Edit person</h3>
+
+@if (model != null)
+{
+    <EmployeeForm Model="model" OnValidSubmit="Edit" />
+}
+else
+{
+    <p>
+        No element to see
+    </p>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Employee model;
+
+    protected async override Task OnInitializedAsync()
+    {
+        model = await repository.GetById(Id);
+    }
+
+    private async Task Edit()
+    {
+        await repository.Edit(model);
+
+        navigationManager.NavigateTo("listofpersons");
+    }
+}

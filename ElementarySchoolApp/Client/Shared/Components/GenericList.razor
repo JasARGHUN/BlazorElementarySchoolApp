@@ -1,0 +1,53 @@
+﻿@typeparam TItem
+
+@if (List == null)
+{
+    @if (NullTemplate != null)
+    {
+        @NullTemplate
+    }
+    else
+    {
+        <p>
+            Loading... You can add here some loading gif
+        </p>
+    }
+}
+else if (List.Count == 0)
+{
+    @if (EmptyTemplate != null)
+    {
+        @EmptyTemplate
+    }
+    else
+    {
+        <p>
+            No records to show
+        </p>
+    }
+}
+else
+{
+    @if (ElementTemplate != null)
+    {
+        @foreach (var element in List)
+        {
+            @*Передаем в параметр компонета данные*@
+            @ElementTemplate(element);
+        }
+    }
+    else
+    {
+        @WholeListTemplate
+    }
+}
+
+
+
+@code {
+    [Parameter] public RenderFragment NullTemplate { get; set; }
+    [Parameter] public RenderFragment EmptyTemplate { get; set; }
+    [Parameter] public RenderFragment<TItem> ElementTemplate { get; set; }
+    [Parameter] public RenderFragment WholeListTemplate { get; set; }
+    [Parameter] public List<TItem> List { get; set; } // Обобщенный параметр
+}

@@ -1,0 +1,34 @@
+﻿@page "/group/edit/{Id:int}"
+@inject NavigationManager navigationManager
+@inject IGroupRepository repository
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+<h3>Edit group</h3>
+
+@if (model != null)
+{
+    <GroupForm Model="model" OnValidSubmit="Edit" />
+}
+else
+{
+    <p>
+        No element to see
+    </p>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Group model;
+
+    protected async override Task OnInitializedAsync()
+    {
+        model = await repository.GetById(Id);
+    }
+
+    private async Task Edit()
+    {
+        await repository.Edit(model);
+
+        navigationManager.NavigateTo($"listofgroup");
+    }
+}

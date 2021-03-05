@@ -1,0 +1,8 @@
+Back-End
+1) Add PaginationDTO.
+2) Add from Helpers folder a new static file HttpContextExtensions, QueryableExtensions, and upgrade your controllers.
+3) After add from BusinessLogic/Helpers IHttpServiceExtensionMethods and add new dto class PaginatedResponseDTO, and upgrade your Repositories.
+
+Front-End
+1) Add Pagination.razor in your Component folder in Client
+2) Add logic to your UI

@@ -1,0 +1,82 @@
+﻿@page "/person/{Id:int}"
+@inject IEmployeeRepository repository
+@inject IJSRuntime jsRuntime
+@inject NavigationManager navigationManager
+
+<h3>Person details</h3>
+
+@if (model != null)
+{
+    <div class="card mb-3">
+        <img src="@model.Photo" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">
+                @model.FirstName @model.MiddleName @model.LastName
+            </h5>
+            <p class="card-text">
+                Age: @model.Age
+            </p>
+            <p class="card-text">
+                Profile: @model.Profile
+            </p>
+            <p class="card-text">
+                <small class="text-muted">
+                    Date of got a job: @model.DateOfGotAJob.Value.ToString("dd MMM yyyy")
+                </small>
+            </p>
+        </div>
+        <AuthorizeView Roles="@StaticDetails.Role_Admin">
+            <Authorized>
+                <div class="card-footer">
+                    <a href="employee/edit/@model.Id" class="btn btn-warning">
+                        Edit
+                    </a>
+                    <button class="btn btn-danger" @onclick="(() => Delete(model.Id))">
+                        Delete
+                    </button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+}
+else
+{
+    <p>
+        No element to see
+    </p>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Employee model;
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            model = await repository.GetById(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        var confirm = await jsRuntime.Confirm($"Confirm delete the {model.FirstName} {model.LastName}");
+
+        if (confirm)
+        {
+            try
+            {
+                await repository.DeleteAsync(id);
+                navigationManager.NavigateTo("listofpersons");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+}

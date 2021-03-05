@@ -1,0 +1,79 @@
+﻿@page "/groupdetails/{Id:int}"
+
+@inject IGroupRepository repository
+@inject IJSRuntime jsRuntime
+@inject NavigationManager navigationManager
+
+<h3>Group details</h3>
+
+@if (model != null)
+{
+    <div class="card" style="width: 18rem;">
+        <img src="@model.GroupImage" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">
+                @model.Name
+            </h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+                @model.Description
+            </li>
+            <li class="list-group-item">
+            </li>
+        </ul>
+        <AuthorizeView Roles="@StaticDetails.Role_Admin">
+            <Authorized>
+                <div class="card-body">
+                    <a href="group/edit/@model.Id" class="btn btn-warning">
+                        Edit
+                    </a>
+                    <button class="btn btn-danger" @onclick="(() => Delete(model.Id))">
+                        Delete
+                    </button>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+}
+else
+{
+    <p>
+        No element to see
+    </p>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Group model;
+
+    protected async override Task OnInitializedAsync()
+    {
+        try
+        {
+            model = await repository.GetById(Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        var confirm = await jsRuntime.Confirm($"Confirm delete the {model.Name}");
+
+        if (confirm)
+        {
+            try
+            {
+                await repository.DeleteAsync(id);
+                navigationManager.NavigateTo("listofgroup");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+}

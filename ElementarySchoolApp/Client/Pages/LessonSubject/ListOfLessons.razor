@@ -1,0 +1,121 @@
+﻿@page "/listoflessons"
+@inject ILessonRepository repository
+@inject NavigationManager navigationManager
+@inject IJSRuntime jsRuntime
+
+<h3>ListOfLessons</h3>
+
+<div>
+    <AuthorizeView Roles="@StaticDetails.Role_Admin">
+        <Authorized>
+            <a href="lesson/add" class="btn btn-warning">
+                Add
+            </a>
+        </Authorized>
+    </AuthorizeView>
+</div>
+<div>
+    <GenericList List="Lessons">
+        <WholeListTemplate>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+
+                        </th>
+                        <th>
+                            Group name
+                        </th>
+                        <th>
+
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Lessons)
+                    {
+                        <tr>
+                            <td>
+                                @item.Id
+                            </td>
+                            <td>
+                                @item.LessonName
+                            </td>
+                            <td>
+                                <AuthorizeView Roles="@StaticDetails.Role_Admin">
+                                    <Authorized>
+                                        <a href="lesson/edit/@item.Id" class="btn btn-warning">
+                                            Edit
+                                        </a>
+                                        <button class="btn btn-danger" @onclick="(() => Delete(item.Id))">
+                                            Delete
+                                        </button>
+                                    </Authorized>
+                                </AuthorizeView>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </WholeListTemplate>
+    </GenericList>
+
+    <Pagination CurrentPage="@pagination.Page"
+                TotalAmountPages="totalPages"
+                SelectedPage="SelectedPages" />
+
+</div>
+
+@code {
+
+    List<Lesson> Lessons;
+    PaginationDTO pagination = new PaginationDTO();
+
+    private int totalPages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await Load();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        var confirm = await jsRuntime.Confirm($"Confirm delete");
+
+        if (confirm)
+        {
+            try
+            {
+                await repository.DeleteAsync(id);
+                var response = await repository.GetAll(pagination);
+                Lessons = response.Response;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+    }
+
+    private async Task Load()
+    {
+        var response = await repository.GetAll(pagination);
+        Lessons = response.Response;
+
+        totalPages = response.TotalAmountPages;
+    }
+
+    private async Task SelectedPages(int page)
+    {
+        pagination.Page = page;
+
+        await Load();
+    }
+}

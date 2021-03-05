@@ -1,0 +1,4 @@
+1) Add AutoMapper in your app and add AutoMapper profile class.
+2) Add in your controller
+
+Value.ToString("dd MMM yyyy")

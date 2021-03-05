@@ -1,0 +1,138 @@
+﻿@page "/classroom/search"
+@inject IRoomRepository roomRepository
+@inject IGroupRepository groupRepository
+@inject NavigationManager navigationManager
+
+<EditForm Model="FilterItem">
+    <div class="container">
+        <div class="form-inline">
+
+            <div class="form-group mx-sm-3 mb-2">
+                <label class="sr-only">
+                    Class
+                </label>
+                <input @bind-value="FilterItem.Name" @bind-value:event="oninput"
+                       @onkeypress="@((KeyboardEventArgs e) => KeyPress(e))"
+                       type="text" class="form-control" id="title" placeholder="class room..." />
+            </div>
+
+            <div class="form-group mx-sm-3 mb-2">
+                <select class="form-control" @bind="FilterItem.GroupId">
+                    <option value="0">
+                        --Select a Elements
+                    </option>
+                    @foreach (var item in Groups)
+                    {
+                        <option value="@item.Id">
+                            @item.Name
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group mx-sm-3 mb-2">
+                <input type="checkbox" class="form-check-input" id="upcomingReleases"
+                       @bind="FilterItem.UpcomingReleases" />
+                <label class="form-check-label" for="upcomingReleases">
+                    Upcoming Releases
+                </label>
+            </div>
+
+            <div class="form-group mx-sm-3 mb-2">
+                <input type="checkbox" class="form-check-input" id="upcomingReleases"
+                       @bind="FilterItem.IsCompleted" />
+                <label class="form-check-label" for="inTheaters">
+                    Completed classes
+                </label>
+            </div>
+
+            <button @onclick="SearchFor"
+                    type="button" class="btn btn-primary mb-2 mx-sm-3">
+                Search
+            </button>
+            <button @onclick="Clear"
+                    type="button" class="btn btn-danger mb-2">
+                Clear
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+<RoomsList Rooms="Rooms">
+
+</RoomsList>
+
+<Pagination CurrentPage="FilterItem.Page" TotalAmountPages="totalAmountPages" SelectedPage="SelectedPage"/>
+
+@code {
+    private List<Room> Rooms;
+    private FilterItemDTO FilterItem = new FilterItemDTO();
+    private List<Group> Groups = new List<Group>();
+    private int totalAmountPages;
+
+    protected async override Task OnInitializedAsync()
+    {
+        Groups = await groupRepository.GetItemList();
+        await LoadItems();
+    }
+
+    private async Task LoadItems()
+    {
+        //var queryString = GenerateQueryString();
+
+        //if (!string.IsNullOrWhiteSpace(queryString))
+        //{
+        //    queryString = $"?{queryString}";
+        //    navigationManager.NavigateTo("classroom/search" + queryString);
+        //}
+
+        var response = await roomRepository.GetItemsFiltered(FilterItem);
+        Rooms = response.Response;
+        totalAmountPages = response.TotalAmountPages;
+    }
+
+    private string GenerateQueryString()
+    {
+        var queryStringsDict = new Dictionary<string, string>();
+        queryStringsDict["groupId"] = FilterItem.GroupId.ToString();
+        queryStringsDict["name"] = FilterItem.Name ?? "";
+        queryStringsDict["iscompleted"] = FilterItem.IsCompleted.ToString();
+        queryStringsDict["upcomingReleases"] = FilterItem.UpcomingReleases.ToString();
+        queryStringsDict["page"] = FilterItem.Page.ToString();
+
+        var defaultValue = new List<string>() { "false", "", "0" };
+
+        return string.Join("&", queryStringsDict
+            .Where(x => !defaultValue.Contains(x.Value.ToLower()))
+            .Select(x => $"{x.Key}={System.Web.HttpUtility.UrlEncode(x.Value)}").ToArray());
+
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        FilterItem.Page = page;
+        await LoadItems();
+    }
+
+    private async Task KeyPress(KeyboardEventArgs e)
+    {
+        if(e.Key == "Enter")
+        {
+            await SearchFor();
+        }
+    }
+
+    private async Task SearchFor()
+    {
+        await LoadItems();
+    }
+
+    private async Task Clear()
+    {
+        FilterItem.Name = "";
+        FilterItem.GroupId = 0;
+        FilterItem.UpcomingReleases = false;
+        FilterItem.IsCompleted = false;
+        await LoadItems();
+    }
+}

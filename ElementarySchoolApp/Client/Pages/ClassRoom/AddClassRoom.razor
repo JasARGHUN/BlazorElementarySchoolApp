@@ -1,0 +1,52 @@
+﻿@page "/classroom/add"
+
+@inject NavigationManager navigationManager
+@inject IRoomRepository repository
+@inject IGroupRepository groupRepository
+@inject ILessonRepository lessonRepository
+@inject IEmployeeRepository employeeRepository
+
+<h3>Add class room</h3>
+@if (NotSelectedGroup != null)
+{
+    <AuthorizeView Roles="@StaticDetails.Role_Admin">
+        <Authorized>
+
+            <ClassRoomForm Model="Model" OnValidSubmit="Add"
+                           NotSelectedGroups="NotSelectedGroup"
+                           NotSelectedLessons="NotSelectedLesson" />
+
+        </Authorized>
+    </AuthorizeView>
+}
+
+
+@code {
+    private Room Model = new Room();
+
+    protected async override Task OnInitializedAsync()
+    {
+        //NotSelectedEmployee = await employeeRepository.GetAll();
+        NotSelectedGroup = await groupRepository.GetItemList();
+        NotSelectedLesson = await lessonRepository.GetItemList();
+    }
+
+    //private List<Employee> NotSelectedEmployee;
+
+    private List<Group> NotSelectedGroup;
+
+    private List<Lesson> NotSelectedLesson;
+
+    private async Task Add()
+    {
+        try
+        {
+            var model = await repository.Create(Model);
+            navigationManager.NavigateTo($"classroom/{model}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}

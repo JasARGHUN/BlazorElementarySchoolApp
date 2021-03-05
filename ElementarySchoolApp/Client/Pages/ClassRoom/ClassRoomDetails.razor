@@ -1,0 +1,84 @@
+﻿@page "/classroom/{Id:int}"
+@inject IRoomRepository repository
+
+@if (model == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+<div>
+    <h3>
+        @model.Room.ClassName (@model.Room.StartOfTheSchoolYear.Value.ToString("yyyy"))
+
+        @for (int i = 0; i < model.Groups.Count; i++)
+        {
+            if (i < model.Groups.Count - 1)
+            {
+                @linkGroup(model.Groups[i]) <span>, </span>
+            }
+            else
+            {
+                @linkGroup(model.Groups[i])
+            }
+        }
+
+        @*@for (int i = 0; i < model.Employees.Count; i++)
+        {
+            if (i < model.Employees.Count - 1)
+            {
+                @linkEmployee(model.Employees[i]) <span>, </span>
+            }
+            else
+            {
+                @linkEmployee(model.Employees[i])
+            }
+        }*@
+    </h3>
+
+    <div style="display: flex;">
+        <div class="mt-2" style="display:inline-block;">
+            <img src="@model.Room.RoomImage"/>
+        </div>
+    </div>
+
+    <h5>
+        @model.Room.StartOfTheSchoolYear.Value.ToString("dd MMM yyyy") / @model.Room.EndOfTheSchoolYear.Value.ToString("dd MMM yyyy")
+    </h5>
+
+    <div>
+        <p>
+            @model.Room.Description
+        </p>
+    </div>
+
+    <div>
+        <h3>
+            Teachers
+        </h3>
+
+        @foreach(var teacher in model.Employees)
+        {
+            <p>
+                <img src="@teacher.Photo" style="width:50px;height:50px;" />
+                <a href="/person/@teacher.Id">
+                    @teacher.FirstName @teacher.MiddleName @teacher.LastName
+                </a>
+            </p>
+        }
+    </div>
+</div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    RoomDetailsDTO model;
+
+    private RenderFragment<Group> linkGroup = (group) =>@<a href="classroom/search?id=@group.Id">@group.Name</a>;
+    private RenderFragment<Employee> linkEmployee = (employee) =>@<a href="/person/@employee.Id">@employee.FirstName @employee.LastName</a>;
+
+    protected async override Task OnInitializedAsync()
+    {
+        model = await repository.GetObjectDetails(Id);
+    }
+}

@@ -1,0 +1,27 @@
+﻿@page "/lesson/add"
+@inject NavigationManager navigationManager
+@inject ILessonRepository repository
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+<h3>Add lesson</h3>
+
+<LessonForm Model="model" OnValidSubmit="Add">
+
+</LessonForm>
+
+@code {
+    private Lesson model = new Lesson();
+
+    private async Task Add()
+    {
+        try
+        {
+            await repository.Create(model);
+            navigationManager.NavigateTo("listoflessons");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}

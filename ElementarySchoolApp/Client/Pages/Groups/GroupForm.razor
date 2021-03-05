@@ -1,0 +1,55 @@
+﻿<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <div>
+            <InputImage Label="Picture" OnSelectedImage="OnSelectedImage" ImageURL="@imageUrl" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>
+            Name
+        </label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Model.Name" />
+            <ValidationMessage For="@(()=>Model.Name)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>
+            Description
+        </label>
+        <div>
+            <InputTextArea class="form-control" @bind-Value="@Model.Description" />
+            <ValidationMessage For="@(()=>Model.Description)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-success" type="submit">
+            Add
+        </button>
+        <a class="btn btn-primary" href="listofgroup">
+            Back
+        </a>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Group Model { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+    private string imageUrl;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Model.GroupImage))
+        {
+            imageUrl = Model.GroupImage;
+            Model.GroupImage = null;
+        }
+    }
+
+    private void OnSelectedImage(string imageBase64)
+    {
+        Model.GroupImage = imageBase64;
+        imageUrl = null;
+    }
+}

@@ -1,0 +1,32 @@
+﻿@inject IJSRuntime jsRuntime
+@inject IRoomRepository repository
+
+<div class="row pb-5">
+    <GenericList List="Rooms">
+        @*Передаем в обощенный компонет список Rooms*@
+        <ElementTemplate Context="room">
+            <IndividualRoom Room="room" DeleteRoom="DeleteRoom" @key="room.Id"/>
+        </ElementTemplate>
+    </GenericList>
+</div>
+
+@code {
+    // Параметр компонента. Параметры позволяют передать в метод(а тут у нас компонент) некоторые входные данные.
+    [Parameter] public List<Room> Rooms { get; set; }
+
+    private Confirmation confirmation;
+
+    private Room modelToDelete;
+
+    private async Task DeleteRoom(Room room)
+    {
+        //метод Confirm находится в папке Helpers/ IJSRuntimeExtensions.
+        var confirm = await jsRuntime.Confirm($"Confirm delete the {room.ClassName} {room.ClassNumber}");
+
+        if (confirm)
+        {
+            await repository.DeleteAsync(room.Id);
+            Rooms.Remove(room);
+        }
+    }
+}

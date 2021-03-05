@@ -1,0 +1,5 @@
+1)Add in your controller new action method Filter.//If you want to see a temp => go to Server/Controllers/RoomController
+2)Add in DTOs folder new class FilterItemDTO.
+3)Add in your repository new method GetItemsFiltered.//If you want to see a temp => go to BusinessLogic/Repository/RoomRepository
+4)Add filter in your UI.//If you want to see a temp => go to Client/Pages/ClassRoom/ClassRoomFilter
+PS All tools what you need locate in Server/Helpers.

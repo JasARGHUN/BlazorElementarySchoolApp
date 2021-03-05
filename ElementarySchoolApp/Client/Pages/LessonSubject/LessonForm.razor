@@ -1,0 +1,34 @@
+﻿<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label>
+            Name
+        </label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Model.LessonName" />
+            <ValidationMessage For="@(()=>Model.LessonName)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>
+            Duration
+        </label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="@Model.Duration" />
+            <ValidationMessage For="@(()=>Model.Duration)" />
+        </div>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-success" type="submit">
+            Add
+        </button>
+        <a class="btn btn-primary" href="listofgroup">
+            Back
+        </a>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Lesson Model { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}

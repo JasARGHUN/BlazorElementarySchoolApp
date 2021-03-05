@@ -1,0 +1,185 @@
+﻿@inject IEmployeeRepository employeeRepository
+
+<EditForm Model="Model" OnValidSubmit="OnDataAnnotationsValidated">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <div>
+            <InputImage Label="Picture" OnSelectedImage="OnSelectedImage" ImageURL="@imageUrl" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Class name:
+        </label>
+        <div>
+            <InputText class="form-control" @bind-Value="@Model.ClassName" />
+            <ValidationMessage For="@(() => Model.ClassName)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Class number:
+        </label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="@Model.ClassNumber" />
+            <ValidationMessage For="@(() => Model.ClassNumber)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Class description:
+        </label>
+        <div>
+            <InputTextArea class="form-control" @bind-Value="@Model.Description" rows="5" cols="10" />
+            <ValidationMessage For="@(() => Model.Description)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Total seats:
+        </label>
+        <div>
+            <InputNumber class="form-control" @bind-Value="@Model.TotalSeats" />
+            <ValidationMessage For="@(() => Model.TotalSeats)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Start Of The School Season:
+        </label>
+        <div>
+            <InputDate @bind-Value="@Model.StartOfTheSchoolYear" class="form-control"></InputDate>
+            <ValidationMessage For="@(() => Model.StartOfTheSchoolYear)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            End Of The School Season:
+        </label>
+        <div>
+            <InputDate @bind-Value="@Model.EndOfTheSchoolYear" class="form-control"></InputDate>
+            <ValidationMessage For="@(() => Model.EndOfTheSchoolYear)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            Complete class:
+        </label>
+        <div>
+            <InputCheckbox @bind-Value="@Model.CompleteСlass" class="form-control"></InputCheckbox>
+            <ValidationMessage For="@(() => Model.CompleteСlass)" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>
+            ClassRoom Lessons
+        </label>
+        <MultipleSelector Selected="SelectedLesson" NoSelected="NotSelectedLesson"></MultipleSelector>
+    </div>
+
+    <div class="form-group">
+        <label>
+            ClassRoom Group
+        </label>
+        <MultipleSelector Selected="SelectedGroup" NoSelected="NotSelectedGroup"></MultipleSelector>
+    </div>
+
+    <div class="form-group">
+        <label>
+            ClassRoom Teachers
+        </label>
+
+        <MultipleSelectorTypeahead Context="employee"
+                                   SearchMethod="SearchMethod"
+                                   SelectedElements="SelectedEmployees">
+            <MyResultTemplate>
+                <img style="width:50px;" src="@employee.Photo" />
+                @employee.FirstName
+            </MyResultTemplate>
+            <MyListTemplate>
+                @employee.FirstName @employee.LastName
+            </MyListTemplate>
+        </MultipleSelectorTypeahead>
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-success" type="submit">
+            Add
+        </button>
+        <a class="btn btn-primary" href="classrooms">
+            Back
+        </a>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Room Model { get; set; }
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter] public List<Employee> SelectedEmployees { get; set; } = new List<Employee>();
+
+    [Parameter] public List<Lesson> SelectedLessons { get; set; } = new List<Lesson>();
+    [Parameter] public List<Lesson> NotSelectedLessons { get; set; } = new List<Lesson>();
+
+    [Parameter] public List<Group> SelectedGroups { get; set; } = new List<Group>();
+    [Parameter] public List<Group> NotSelectedGroups { get; set; } = new List<Group>();
+
+    private List<MultipleSelectorModel> SelectedLesson = new List<MultipleSelectorModel>();
+    private List<MultipleSelectorModel> NotSelectedLesson = new List<MultipleSelectorModel>();
+
+    private List<MultipleSelectorModel> SelectedGroup = new List<MultipleSelectorModel>();
+    private List<MultipleSelectorModel> NotSelectedGroup = new List<MultipleSelectorModel>();
+
+    [Parameter] public List<Employee> SelectedEmployeesList { get; set; } = new List<Employee>();
+
+    private string imageUrl;
+
+    protected override void OnInitialized()
+    {
+        SelectedLesson = SelectedLessons.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.LessonName)).ToList();
+        NotSelectedLesson = NotSelectedLessons.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.LessonName)).ToList();
+
+        SelectedGroup = SelectedGroups.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+        NotSelectedGroup = NotSelectedGroups.Select(x => new MultipleSelectorModel(x.Id.ToString(), x.Name)).ToList();
+
+        if (!string.IsNullOrEmpty(Model.RoomImage))
+        {
+            imageUrl = Model.RoomImage;
+            Model.RoomImage = null;
+        }
+    }
+
+    private void OnSelectedImage(string imageBase64)
+    {
+        Model.RoomImage = imageBase64;
+        imageUrl = null;
+    }
+
+    private async Task<IEnumerable<Employee>> SearchMethod(string searchText)
+    {
+        return await employeeRepository.GetObjectByName(searchText);
+    }
+
+    private async Task OnDataAnnotationsValidated()
+    {
+        Model.ClassRoomGroupList = SelectedGroup.Select(x => new ClassRoomGroup { GroupId = int.Parse(x.Key) }).ToList();
+        Model.ClassRoomTeachersList = SelectedEmployees.Select(x => new ClassRoomTeachers { EmployeeId = x.Id }).ToList();
+        Model.ClassRoomLessonsList = SelectedLesson.Select(x => new ClassRoomLessons { LessonId = int.Parse(x.Key) }).ToList();
+
+        if (!string.IsNullOrWhiteSpace(Model.RoomImage))
+        {
+            imageUrl = null;
+        }
+
+        await OnValidSubmit.InvokeAsync(null);
+    }
+}

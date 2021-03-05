@@ -1,0 +1,32 @@
+﻿@page "/lesson/edit/{Id:int}"
+@inject NavigationManager navigationManager
+@attribute [Authorize(Roles = StaticDetails.Role_Admin)]
+
+@if (model != null)
+{
+    <LessonForm Model="model" OnValidSubmit="Edit" />
+}
+else
+{
+    <p>
+        No element to see
+    </p>
+}
+
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Lesson model = new Lesson();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private void Edit()
+    {
+        Console.WriteLine($"{model.LessonName} {model.Duration}");
+
+        navigationManager.NavigateTo("listoflessons");
+    }
+}

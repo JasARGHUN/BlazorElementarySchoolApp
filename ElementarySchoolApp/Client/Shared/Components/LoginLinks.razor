@@ -1,0 +1,17 @@
+﻿<AuthorizeView>
+    <Authorized>
+        @if (context.User.IsInRole("admin"))
+        {
+            <span class="ml">Hello, Admin!</span>
+        }
+        else
+        {
+            <span class="ml">Hello, Guest!</span>
+        }
+        <a href="Logout" class="nav-link btn btn-link ml">Log out</a>
+    </Authorized>
+    <NotAuthorized>
+        <a href="Register" class="nav-link btn btn-link ml">Register</a>
+        <a href="Login" class="nav-link btn btn-link ml">Login</a>
+    </NotAuthorized>
+</AuthorizeView>
